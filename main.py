@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
 
-def epsilon(max_kx, max_ky, a, t, figsize, dpi, elev, azim, filename):
+def epsilon(max_kx, max_ky, a, t):
     """Compute and save the epsilon surface.
 
     Args:
@@ -24,6 +24,10 @@ def epsilon(max_kx, max_ky, a, t, figsize, dpi, elev, azim, filename):
         np.cos(np.sqrt(3) * KY * a / 2)**2
     )
     epsilon_n = -epsilon_p
+    return epsilon_p, epsilon_n, KX, KY
+
+
+def plot_epsilon(epsilon_p, epsilon_n, KX, KY,figsize, dpi, elev, azim, filename):
     # Ensure output directory exists
     os.makedirs('images', exist_ok=True)
 
@@ -50,11 +54,11 @@ def epsilon(max_kx, max_ky, a, t, figsize, dpi, elev, azim, filename):
     plt.close(fig)
     
     
-    
+def plotly_epsilon():
     #using plotly
     fig = go.Figure(data=[go.Surface(z=epsilon_p, x=kx, y=ky),
                           go.Surface(z=epsilon_n, x=kx, y=ky)])
-    fig.update_layout(title=dict(text=r'$\varepsilon(k_x,k_y)$'), autosize=True
+    fig.update_layout(title=dict(text=r'$\varepsilon(k_x,k_y)$'), autosize=True,
                   width=1000, height=1000,
                   margin=dict(l=150, r=50, b=65, t=90))
     
@@ -62,7 +66,11 @@ def epsilon(max_kx, max_ky, a, t, figsize, dpi, elev, azim, filename):
 
 if __name__ == "__main__":
     # Example: larger figure and different camera angle
-    epsilon(max_kx=2, max_ky=2, t=1, a=1, figsize=(9, 7), dpi=100, elev=0, azim=45, filename="small_kval_side_plot.png")
-    epsilon(max_kx=1000, max_ky=1000, t=1, a=1, figsize=(9, 7), dpi=100, elev=0, azim=45, filename="large_kval_side_plot.png")
-    epsilon(max_kx=2, max_ky=2, t=1, a=1, figsize=(9, 7), dpi=100, elev=25, azim=45, filename="small_kval_top_plot.png")
-    epsilon(max_kx=1000, max_ky=1000, t=1, a=1, figsize=(9, 7), dpi=100, elev=25, azim=45, filename="large_kval_top_plot.png")
+    small_epsilon_p, small_epsilon_n, KX, KY = epsilon(max_kx=2, max_ky=2, t=1, a=1)
+    plot_epsilon(epsilon_p=small_epsilon_p, epsilon_n=small_epsilon_n, KX=KX, KY=KY, figsize=(9, 7), dpi=100, elev=0, azim=45, filename="small_kval_side_plot.jpeg")
+    plot_epsilon(epsilon_p=small_epsilon_p, epsilon_n=small_epsilon_n, KX=KX, KY=KY, figsize=(9, 7), dpi=100, elev=25, azim=45, filename="small_kval_top_plot.jpeg")
+    
+    large_epsilon_p, large_epsilon_n, KX, KY = epsilon(max_kx=50, max_ky=50, t=1, a=1)
+    plot_epsilon(epsilon_p=large_epsilon_p, epsilon_n=large_epsilon_n, KX=KX, KY=KY, figsize=(9, 7), dpi=100, elev=0, azim=45, filename="large_kval_side_plot.jpeg")
+    plot_epsilon(epsilon_p=large_epsilon_p, epsilon_n=large_epsilon_n, KX=KX, KY=KY, figsize=(9, 7), dpi=100, elev=25, azim=45, filename="large_kval_top_plot.jpeg")
+    
