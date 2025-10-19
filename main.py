@@ -1,8 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits import mplot3d
-
+import plotly.graph_objects as go
 
 
 def epsilon(max_kx, max_ky, a, t, figsize, dpi, elev, azim, filename):
@@ -49,7 +48,17 @@ def epsilon(max_kx, max_ky, a, t, figsize, dpi, elev, azim, filename):
     plt.tight_layout()
     plt.savefig("images/" + filename, dpi=dpi)
     plt.close(fig)
-
+    
+    
+    
+    #using plotly
+    fig = go.Figure(data=[go.Surface(z=epsilon_p, x=kx, y=ky),
+                          go.Surface(z=epsilon_n, x=kx, y=ky)])
+    fig.update_layout(title=dict(text=r'$\varepsilon(k_x,k_y)$'), autosize=True
+                  width=1000, height=1000,
+                  margin=dict(l=150, r=50, b=65, t=90))
+    
+    fig.show()
 
 if __name__ == "__main__":
     # Example: larger figure and different camera angle
