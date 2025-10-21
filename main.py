@@ -17,8 +17,8 @@ def epsilon(max_kx, max_ky, a, t):
         elev: elevation angle for 3D view
         azim: azimuth angle for 3D view
     """
-    kx = np.linspace(-max_kx, max_kx, 100)
-    ky = np.linspace(-max_ky, max_ky, 100)
+    kx = np.linspace(-max_kx, max_kx, 1000)
+    ky = np.linspace(-max_ky, max_ky, 1000)
     KX, KY = np.meshgrid(kx, ky)
     epsilon_p = t * np.sqrt(
         1 + 
