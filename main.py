@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
-from dash import Dash, html, dcc
+from dash import Dash, html, dcc, Input, Output, callback
 
 
 
@@ -56,30 +56,76 @@ def plot_epsilon(epsilon_p, epsilon_n, KX, KY,figsize, dpi, elev, azim, filename
     plt.close(fig)
     
     
-def plotly_epsilon(epsilon_p, epsilon_n, kx, ky):
+def plotly_epsilon(large_epsilon_p, large_epsilon_n,epsilon_p, epsilon_n, kx, ky, large_kx, large_ky):
     #using plotly
-    fig = go.Figure(data=[go.Surface(z=epsilon_p, x=kx, y=ky),
-                          go.Surface(z=epsilon_n, x=kx, y=ky)])
-    fig.update_layout(title=dict(text=r'2D dispersion relation for graphite'), autosize=True,
-                  width=1000, height=1000,
-                  margin=dict(l=150, r=50, b=65, t=90))
+    fig = go.Figure(data=[
+        go.Surface(z=epsilon_p, x=kx, y=ky, name='εₚ',
+                   colorscale=[[0, 'red'], [1, 'orange']], showscale=False, opacity=0.9, showlegend=True),
+        go.Surface(z=epsilon_n, x=kx, y=ky, name='εₙ',
+                   colorscale=[[0, 'blue'], [1, 'cyan']], showscale=False, opacity=0.9, showlegend=True)
+    ])
+    fig.update_layout(title='', autosize=True,
+                  width=1000, height=700,
+                  margin=dict(l=0, r=0, b=0, t=0))
     app = Dash()
     app.layout = html.Div([
-        dcc.Graph(figure=fig)
+        html.H1(children="2D Dispersion Relation For Graphene", 
+                style={
+            'textAlign': 'center'
+            #,'color': colors['text']
+        }),
+        
+        dcc.RadioItems(
+            ['Small k values', 'Large k values'],
+            'Small k values',
+            id='k-vals',
+            inline=True
+        ),
+        
+        dcc.Graph(figure=fig, id='fig')
     ])
+    
+    @callback(
+        Output("fig", "figure"),
+        Input("k-vals", "value")
+    )
+    def update_graph(k_vals):
+        if k_vals == "Small k values":
+            fig = go.Figure(data=[
+                go.Surface(z=epsilon_p, x=kx, y=ky, name='εₚ',
+                           colorscale=[[0, 'red'], [1, 'orange']], showscale=False, opacity=0.9, showlegend=True),
+                go.Surface(z=epsilon_n, x=kx, y=ky, name='εₙ',
+                           colorscale=[[0, 'blue'], [1, 'cyan']], showscale=False, opacity=0.9, showlegend=True)
+            ])
+        else:
+            fig = go.Figure(data=[
+                go.Surface(z=large_epsilon_p, x=large_kx, y=large_ky, name='εₚ',
+                           colorscale=[[0, 'red'], [1, 'orange']], showscale=False, opacity=0.9, showlegend=True),
+                go.Surface(z=large_epsilon_n, x=large_kx, y=large_ky, name='εₙ',
+                           colorscale=[[0, 'blue'], [1, 'cyan']], showscale=False, opacity=0.9, showlegend=True)
+            ])
+        fig.update_layout(title='', autosize=True,
+                         width=1000, height=700,
+                         margin=dict(l=0, r=0, b=0, t=0))
+        return fig
+    
+    return app
+        
 
-    app.run(debug=True, use_reloader=False)
+    
     
     
 
 if __name__ == "__main__":
     # Example: larger figure and different camera angle
-    small_epsilon_p, small_epsilon_n, KX, KY, kx, ky = epsilon(max_kx=2, max_ky=2, t=1, a=1)
-    plot_epsilon(epsilon_p=small_epsilon_p, epsilon_n=small_epsilon_n, KX=KX, KY=KY, figsize=(9, 7), dpi=100, elev=0, azim=45, filename="small_kval_side_plot.jpeg")
-    plot_epsilon(epsilon_p=small_epsilon_p, epsilon_n=small_epsilon_n, KX=KX, KY=KY, figsize=(9, 7), dpi=100, elev=25, azim=45, filename="small_kval_top_plot.jpeg")
-    plotly_epsilon(epsilon_p=small_epsilon_p, epsilon_n=small_epsilon_n, kx=kx, ky=ky)
+    small_epsilon_p, small_epsilon_n, small_KX, small_KY, small_kx, small_ky = epsilon(max_kx=2, max_ky=2, t=1, a=1)
+    plot_epsilon(epsilon_p=small_epsilon_p, epsilon_n=small_epsilon_n, KX=small_KX, KY=small_KY, figsize=(9, 7), dpi=100, elev=0, azim=45, filename="small_kval_side_plot.jpeg")
+    plot_epsilon(epsilon_p=small_epsilon_p, epsilon_n=small_epsilon_n, KX=small_KX, KY=small_KY, figsize=(9, 7), dpi=100, elev=25, azim=45, filename="small_kval_top_plot.jpeg")
     
-    large_epsilon_p, large_epsilon_n, KX, KY = epsilon(max_kx=50, max_ky=50, t=1, a=1)
-    plot_epsilon(epsilon_p=large_epsilon_p, epsilon_n=large_epsilon_n, KX=KX, KY=KY, figsize=(9, 7), dpi=100, elev=0, azim=45, filename="large_kval_side_plot.jpeg")
-    plot_epsilon(epsilon_p=large_epsilon_p, epsilon_n=large_epsilon_n, KX=KX, KY=KY, figsize=(9, 7), dpi=100, elev=25, azim=45, filename="large_kval_top_plot.jpeg")
+    large_epsilon_p, large_epsilon_n, large_KX, large_KY, large_kx, large_ky = epsilon(max_kx=50, max_ky=50, t=1, a=1)
+    plot_epsilon(epsilon_p=large_epsilon_p, epsilon_n=large_epsilon_n, KX=large_KX, KY=large_KY, figsize=(9, 7), dpi=100, elev=0, azim=45, filename="large_kval_side_plot.jpeg")
+    plot_epsilon(epsilon_p=large_epsilon_p, epsilon_n=large_epsilon_n, KX=large_KX, KY=large_KY, figsize=(9, 7), dpi=100, elev=25, azim=45, filename="large_kval_top_plot.jpeg")
     
+    
+    app = plotly_epsilon(large_epsilon_p=large_epsilon_p, large_epsilon_n= large_epsilon_n, epsilon_p=small_epsilon_p, epsilon_n=small_epsilon_n, kx=small_kx, ky=small_ky, large_kx=large_kx, large_ky=large_ky)
+    app.run(debug=True, use_reloader=False)
